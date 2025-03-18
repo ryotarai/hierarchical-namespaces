@@ -37,9 +37,12 @@ import (
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	"sigs.k8s.io/controller-runtime/pkg/metrics"
+	"sigs.k8s.io/controller-runtime/pkg/metrics/server"
+	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
 	// +kubebuilder:scaffold:imports
 
@@ -212,7 +215,7 @@ func enableMetrics() func() {
 	if enableStackdriver {
 		setupLog.Info("Creating OpenCensus->Stackdriver exporter")
 		sd, err := stackdriver.NewExporter(stackdriver.Options{
-			// Stackdriver’s minimum stats reporting period must be >= 60 seconds.
+			// Stackdriver's minimum stats reporting period must be >= 60 seconds.
 			// https://opencensus.io/exporters/supported-exporters/go/stackdriver/
 			ReportingInterval: stats.ReportingInterval,
 		})
@@ -273,13 +276,17 @@ func createManager() ctrl.Manager {
 	// it turns out to be harmful.
 	cfg.Burst = int(cfg.QPS * 1.5)
 	mgr, err := ctrl.NewManager(cfg, ctrl.Options{
-		NewClient:              config.NewClient(webhooksOnly),
+		Client: client.Options{
+			Cache: &client.CacheOptions{
+				Unstructured: true,
+			},
+		},
 		Scheme:                 scheme,
-		MetricsBindAddress:     metricsAddr,
+		Metrics:                server.Options{BindAddress: metricsAddr},
 		HealthProbeBindAddress: probeAddr,
 		LeaderElection:         enableLeaderElection,
 		LeaderElectionID:       leaderElectionId,
-		Port:                   webhookServerPort,
+		WebhookServer:          &webhook.DefaultServer{Options: webhook.Options{Port: webhookServerPort}},
 	})
 	if err != nil {
 		setupLog.Error(err, "unable to create manager")

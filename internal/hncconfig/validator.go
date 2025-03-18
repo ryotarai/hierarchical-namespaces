@@ -35,7 +35,7 @@ type Validator struct {
 	Log     logr.Logger
 	Forest  *forest.Forest
 	mapper  resourceMapper
-	decoder *admission.Decoder
+	decoder admission.Decoder
 }
 
 type gvkSet map[schema.GroupVersionKind]api.SynchronizationMode
@@ -234,6 +234,6 @@ func (v *Validator) InjectConfig(cf *rest.Config) error {
 }
 
 func (v *Validator) InjectDecoder(d *admission.Decoder) error {
-	v.decoder = d
+	v.decoder = *d
 	return nil
 }

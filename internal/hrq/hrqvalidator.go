@@ -37,7 +37,7 @@ const (
 type HRQ struct {
 	server  serverClient
 	Log     logr.Logger
-	decoder *admission.Decoder
+	decoder admission.Decoder
 }
 
 // serverClient represents the checks that should typically be performed against
@@ -124,6 +124,6 @@ func (v *HRQ) InjectClient(c client.Client) error {
 }
 
 func (r *HRQ) InjectDecoder(d *admission.Decoder) error {
-	r.decoder = d
+	r.decoder = *d
 	return nil
 }

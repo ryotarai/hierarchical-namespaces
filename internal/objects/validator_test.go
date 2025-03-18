@@ -36,7 +36,9 @@ func TestType(t *testing.T) {
 	f := forest.NewForest()
 	f.AddTypeSyncer(r)
 	l := zap.New()
-	v := &Validator{Forest: f, Log: l}
+	scheme := runtime.NewScheme()
+	decoder := admission.NewDecoder(scheme)
+	v := &Validator{Forest: f, Log: l, decoder: decoder}
 	config.SetNamespaces("", "kube-system")
 
 	tests := []struct {
@@ -681,7 +683,7 @@ type fakeNSClient struct {
 }
 
 // Get decodes given client.Object as corev1.Namespace that might contains deletionTimestamp
-func (c fakeNSClient) Get(_ context.Context, key client.ObjectKey, obj client.Object) error {
+func (c fakeNSClient) Get(_ context.Context, key client.ObjectKey, obj client.Object, _ ...client.GetOption) error {
 	nsObj := obj.(*corev1.Namespace)
 	if c.isDeleting {
 		nsObj.DeletionTimestamp = &metav1.Time{Time: time.Now()}
@@ -715,6 +717,18 @@ func (fakeNSClient) RESTMapper() meta.RESTMapper {
 	return nil
 }
 func (fakeNSClient) Scheme() *runtime.Scheme {
+	return nil
+}
+
+func (fakeNSClient) GroupVersionKindFor(obj runtime.Object) (schema.GroupVersionKind, error) {
+	return schema.GroupVersionKind{}, nil
+}
+
+func (fakeNSClient) IsObjectNamespaced(obj runtime.Object) (bool, error) {
+	return true, nil
+}
+
+func (fakeNSClient) SubResource(subResource string) client.SubResourceClient {
 	return nil
 }
 

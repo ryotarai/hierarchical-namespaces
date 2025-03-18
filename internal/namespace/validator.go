@@ -35,7 +35,7 @@ var (
 type Validator struct {
 	Log     logr.Logger
 	Forest  *forest.Forest
-	decoder *admission.Decoder
+	decoder admission.Decoder
 }
 
 // nsRequest defines the aspects of the admission.Request that we care about.
@@ -292,6 +292,6 @@ func (v *Validator) decodeRequest(log logr.Logger, in admission.Request) (*nsReq
 }
 
 func (v *Validator) InjectDecoder(d *admission.Decoder) error {
-	v.decoder = d
+	v.decoder = *d
 	return nil
 }

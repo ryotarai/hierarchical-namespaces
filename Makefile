@@ -108,7 +108,7 @@ test: build test-only
 
 test-only: build-setup-envtest
 	KUBEBUILDER_ASSETS="$(shell ${SETUP_ENVTEST} use ${ENVTEST_K8S_VERSION} --bin-dir ${CURDIR}/bin -p path)" \
-		go test ${DIRS} -coverprofile cover.out
+		go test -v ${DIRS} -coverprofile cover.out
 
 # Builds all binaries (manager and kubectl) and manifests
 build: generate fmt vet staticcheck manifests

@@ -41,7 +41,7 @@ type Validator struct {
 	Log     logr.Logger
 	Forest  *forest.Forest
 	server  serverClient
-	decoder *admission.Decoder
+	decoder admission.Decoder
 }
 
 // serverClient represents the checks that should typically be performed against the apiserver, but
@@ -452,7 +452,7 @@ func (v *Validator) InjectClient(c client.Client) error {
 }
 
 func (v *Validator) InjectDecoder(d *admission.Decoder) error {
-	v.decoder = d
+	v.decoder = *d
 	return nil
 }
 

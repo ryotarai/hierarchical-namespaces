@@ -36,7 +36,7 @@ type ResourceQuotaStatus struct {
 	Forest *forest.Forest
 
 	client  client.Client
-	decoder *admission.Decoder
+	decoder admission.Decoder
 }
 
 func (r *ResourceQuotaStatus) Handle(ctx context.Context, req admission.Request) admission.Response {
@@ -93,7 +93,7 @@ func (r *ResourceQuotaStatus) InjectClient(c client.Client) error {
 }
 
 func (r *ResourceQuotaStatus) InjectDecoder(d *admission.Decoder) error {
-	r.decoder = d
+	r.decoder = *d
 	return nil
 }
 

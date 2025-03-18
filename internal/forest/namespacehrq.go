@@ -125,17 +125,18 @@ func (n *Namespace) canUseResources(u v1.ResourceList, rqName RQName) error {
 
 		// Construct the error message similar to the RQ exceeded quota error message -
 		// "exceeded quota: gke-hc-hrq, requested: configmaps=1, used: configmaps=2, limited: configmaps=2"
-		msg := fmt.Sprintf("exceeded hierarchical quota in namespace %q: %q", ns.name, nm)
+		msg := "exceeded hierarchical quota in namespace %q: %q"
+		args := []interface{}{ns.name, nm}
 		for _, er := range exceeded {
 			rnm := er.String()
 			// Get the requested, used, limited quantity of the exceeded resource.
 			rq := increases[er]
 			uq := nsQuota.used.subtree[er]
 			lq := nsQuota.limits[nm][er]
-			msg += fmt.Sprintf(", requested: %s=%v, used: %s=%v, limited: %s=%v",
-				rnm, &rq, rnm, &uq, rnm, &lq)
+			msg += ", requested: %s=%v, used: %s=%v, limited: %s=%v"
+			args = append(args, rnm, &rq, rnm, &uq, rnm, &lq)
 		}
-		return fmt.Errorf(msg)
+		return fmt.Errorf(msg, args...)
 	}
 
 	return nil
